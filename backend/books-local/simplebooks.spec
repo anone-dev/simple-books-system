@@ -4,7 +4,8 @@
 import os
 
 block_cipher = None
-base_dir = os.path.dirname(os.path.abspath(SPECPATH))
+_spec_dir = os.path.dirname(os.path.abspath(SPECPATH))
+base_dir = _spec_dir if os.path.isfile(os.path.join(_spec_dir, "app.py")) else os.getcwd()
 
 a = Analysis(
     [os.path.join(base_dir, "app.py")],
