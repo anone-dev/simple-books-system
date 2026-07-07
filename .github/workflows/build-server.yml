@@ -1,0 +1,49 @@
+name: Build Server Packages
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact: SimpleBooks-Windows.exe
+          - os: macos-latest
+            artifact: SimpleBooks-macOS
+          - os: ubuntu-latest
+            artifact: SimpleBooks-Linux
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        working-directory: backend/books-local
+        run: pip install -r requirements.txt
+
+      - name: Build with PyInstaller
+        working-directory: backend/books-local
+        run: pyinstaller simplebooks.spec
+
+      - name: Rename artifact
+        working-directory: backend/books-local/dist
+        shell: bash
+        run: |
+          if [ -f "SimpleBooks.exe" ]; then
+            mv SimpleBooks.exe "${{ matrix.artifact }}"
+          elif [ -f "SimpleBooks" ]; then
+            mv SimpleBooks "${{ matrix.artifact }}"
+          fi
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: backend/books-local/dist/${{ matrix.artifact }}

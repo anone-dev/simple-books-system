@@ -1,0 +1,131 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Simple Books API",
+    "description": "Mock API for QA training — CoE-QA at AXONS",
+    "version": "1.0.0"
+  },
+  "servers": [{"url": "/", "description": "Local server"}],
+  "tags": [
+    {"name": "Status", "description": "Health check"},
+    {"name": "Clients", "description": "Registration and login"},
+    {"name": "Books", "description": "Book catalog"},
+    {"name": "Orders", "description": "Order management (requires auth)"},
+    {"name": "Admin", "description": "Reset endpoints"}
+  ],
+  "paths": {
+    "/status": {
+      "get": {
+        "tags": ["Status"],
+        "summary": "Health check",
+        "operationId": "getStatus",
+        "responses": {"200": {"description": "OK", "content": {"application/json": {"schema": {"type": "object", "properties": {"status": {"type": "string", "example": "OK"}}}}}}}
+      }
+    },
+    "/api-clients": {
+      "post": {
+        "tags": ["Clients"],
+        "summary": "Register new client",
+        "operationId": "registerClient",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["clientName", "clientEmail", "clientPassword"], "properties": {"clientName": {"type": "string", "example": "QA Tester"}, "clientEmail": {"type": "string", "example": "qa@axons.com"}, "clientPassword": {"type": "string", "example": "pass123"}}}}}},
+        "responses": {"201": {"description": "Created", "content": {"application/json": {"schema": {"type": "object", "properties": {"accessToken": {"type": "string"}}}}}}, "409": {"description": "Email already registered"}, "400": {"description": "Missing fields"}}
+      }
+    },
+    "/api-clients/login": {
+      "post": {
+        "tags": ["Clients"],
+        "summary": "Login with email and password",
+        "operationId": "loginClient",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["clientEmail", "clientPassword"], "properties": {"clientEmail": {"type": "string"}, "clientPassword": {"type": "string"}}}}}},
+        "responses": {"200": {"description": "OK", "content": {"application/json": {"schema": {"type": "object", "properties": {"accessToken": {"type": "string"}}}}}}, "401": {"description": "Invalid credentials"}}
+      }
+    },
+    "/books": {
+      "get": {
+        "tags": ["Books"],
+        "summary": "List books (paginated)",
+        "operationId": "listBooks",
+        "parameters": [
+          {"name": "page", "in": "query", "schema": {"type": "integer", "default": 1}},
+          {"name": "pageSize", "in": "query", "schema": {"type": "integer", "default": 5}},
+          {"name": "type", "in": "query", "schema": {"type": "string", "enum": ["fiction", "non-fiction"]}}
+        ],
+        "responses": {"200": {"description": "OK", "content": {"application/json": {"schema": {"type": "object", "properties": {"books": {"type": "array", "items": {"type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}, "type": {"type": "string"}, "available": {"type": "boolean"}}}}, "pagination": {"type": "object", "properties": {"currentPage": {"type": "integer"}, "pageSize": {"type": "integer"}, "totalItems": {"type": "integer"}, "totalPages": {"type": "integer"}}}}}}}}}
+      }
+    },
+    "/books/{id}": {
+      "get": {
+        "tags": ["Books"],
+        "summary": "Get book detail",
+        "operationId": "getBook",
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "integer"}}],
+        "responses": {"200": {"description": "OK"}, "404": {"description": "Not found"}}
+      }
+    },
+    "/orders": {
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Create order",
+        "operationId": "createOrder",
+        "security": [{"BearerAuth": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["bookId", "customerName"], "properties": {"bookId": {"type": "integer", "example": 1}, "customerName": {"type": "string", "example": "John Doe"}}}}}},
+        "responses": {"201": {"description": "Created"}, "401": {"description": "Unauthorized"}, "404": {"description": "Book not found"}, "409": {"description": "Out of stock"}}
+      },
+      "get": {
+        "tags": ["Orders"],
+        "summary": "List my orders",
+        "operationId": "listOrders",
+        "security": [{"BearerAuth": []}],
+        "responses": {"200": {"description": "OK"}, "401": {"description": "Unauthorized"}}
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get order detail",
+        "operationId": "getOrder",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "OK"}, "404": {"description": "Not found"}}
+      },
+      "patch": {
+        "tags": ["Orders"],
+        "summary": "Update order",
+        "operationId": "updateOrder",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"content": {"application/json": {"schema": {"type": "object", "properties": {"customerName": {"type": "string"}}}}}},
+        "responses": {"204": {"description": "Updated"}, "404": {"description": "Not found"}}
+      },
+      "delete": {
+        "tags": ["Orders"],
+        "summary": "Delete order",
+        "operationId": "deleteOrder",
+        "security": [{"BearerAuth": []}],
+        "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"204": {"description": "Deleted"}, "404": {"description": "Not found"}}
+      }
+    },
+    "/stock/reset": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Reset book stock",
+        "operationId": "resetStock",
+        "responses": {"200": {"description": "Stock reset"}}
+      }
+    },
+    "/server/reset": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Full server reset",
+        "operationId": "resetServer",
+        "responses": {"200": {"description": "All data reset"}}
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {"type": "http", "scheme": "bearer"}
+    }
+  }
+}

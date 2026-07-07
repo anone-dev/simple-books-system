@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Books System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.12);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --glass-blur: blur(16px);
+            --glass-card: rgba(255, 255, 255, 0.08);
+            --glass-card-hover: rgba(255, 255, 255, 0.15);
+            --glass-input: rgba(255, 255, 255, 0.06);
+            --glass-input-focus: rgba(255, 255, 255, 0.12);
+            --accent: #6366F1;
+            --accent-hover: #818CF8;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --success: #10B981;
+            --success-bg: rgba(16, 185, 129, 0.15);
+            --error: #EF4444;
+            --error-bg: rgba(239, 68, 68, 0.15);
+            --warning: #F59E0B;
+            --text-primary: rgba(255, 255, 255, 0.95);
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.35);
+            --border: rgba(255, 255, 255, 0.1);
+            --gradient-bg: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #312E81 100%);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--gradient-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-size: 14px;
+        }
+        /* Glass panels */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: var(--glass-shadow);
+        }
+        .glass-card {
+            background: var(--glass-card);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .glass-card:hover {
+            background: var(--glass-card-hover);
+            border-color: var(--glass-border);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Layout */
+        .header {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 { font-size: 1.1rem; font-weight: 700; background: linear-gradient(135deg, #A5B4FC, #6366F1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); margin-left: 10px; }
+        .nav-tabs { display: flex; gap: 4px; margin-left: 24px; }
+        .nav-tab {
+            padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 500;
+            color: var(--text-secondary); cursor: pointer; border: none; background: none;
+            transition: all 0.2s;
+        }
+        .nav-tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+        .nav-tab.active { color: #fff; background: var(--accent); box-shadow: 0 4px 12px var(--accent-glow); }
+
+        .main { display: flex; height: calc(100vh - 56px); }
+        .content { flex: 1; padding: 24px; overflow-y: auto; }
+        .resp-panel {
+            width: 380px; border-left: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(12px);
+            display: flex; flex-direction: column;
+        }
+        .resp-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+        .resp-status { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
+        .resp-status.s2xx { background: var(--success-bg); color: var(--success); }
+        .resp-status.s4xx { background: var(--error-bg); color: var(--error); }
+        .resp-body { flex: 1; padding: 16px; overflow: auto; }
+        .resp-body pre {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12px;
+            background: rgba(0, 0, 0, 0.3); color: #A5B4FC;
+            padding: 16px; border-radius: 10px; white-space: pre-wrap; word-break: break-all;
+            border: 1px solid var(--border);
+        }
+
+        /* Section */
+        .section-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; }
+        .section-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
+        .tab-content { display: none; } .tab-content.active { display: block; }
+
+        /* Form */
+        .form-group { margin-bottom: 14px; }
+        .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; }
+        .form-input {
+            width: 100%; padding: 10px 14px; font-size: 13px; font-family: inherit;
+            background: var(--glass-input); border: 1px solid var(--border); border-radius: 10px;
+            color: var(--text-primary); transition: all 0.2s;
+        }
+        .form-input:focus { outline: none; background: var(--glass-input-focus); border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .form-input::placeholder { color: var(--text-muted); }
+
+        /* Buttons */
+        .btn {
+            padding: 9px 18px; font-size: 13px; font-weight: 500; border-radius: 10px;
+            border: none; cursor: pointer; transition: all 0.2s; font-family: inherit;
+        }
+        .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 12px var(--accent-glow); }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+        .btn-secondary { background: var(--glass-card); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--glass-card-hover); }
+        .btn-danger { background: var(--error-bg); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3); }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+        /* Alert */
+        .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 14px; display: none; }
+        .alert-success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+        .alert-error { background: var(--error-bg); color: var(--error); border: 1px solid rgba(239,68,68,0.3); }
+
+        /* Books */
+        .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+        .chip {
+            padding: 7px 16px; border-radius: 99px; font-size: 12px; font-weight: 500;
+            border: 1px solid var(--border); background: var(--glass-card); color: var(--text-secondary); cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chip:hover { color: var(--text-primary); border-color: var(--glass-border); }
+        .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px var(--accent-glow); }
+
+        .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+        .book-card {
+            padding: 16px; cursor: pointer;
+        }
+        .book-card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow), 0 8px 24px rgba(0,0,0,0.2); }
+        .book-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .book-author { font-size: 12px; color: var(--text-secondary); }
+        .book-meta { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+        .book-price { font-size: 15px; font-weight: 600; margin-top: 8px; color: var(--accent-hover); }
+
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 500; }
+        .badge-fiction { background: rgba(99,102,241,0.15); color: #A5B4FC; }
+        .badge-nonfiction { background: rgba(245,158,11,0.15); color: #FBBF24; }
+        .badge-instock { background: var(--success-bg); color: var(--success); }
+        .badge-outofstock { background: var(--error-bg); color: var(--error); }
+
+        .pagination { display: flex; align-items: center; gap: 14px; margin-top: 20px; justify-content: center; }
+        .pagination .info { font-size: 12px; color: var(--text-secondary); }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); font-weight: 600; color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+        tr:hover td { background: rgba(255,255,255,0.03); }
+
+        /* Token */
+        .token-box {
+            background: rgba(0, 0, 0, 0.3); color: var(--success);
+            font-family: 'JetBrains Mono', monospace; padding: 12px 16px; border-radius: 10px;
+            font-size: 12px; word-break: break-all; margin-top: 8px; border: 1px solid var(--border);
+        }
+
+        /* Grid layout */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .card-box { padding: 20px; margin-bottom: 16px; }
+
+        /* Decorative blobs */
+        .bg-blob {
+            position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.3; pointer-events: none; z-index: -1;
+        }
+        .blob-1 { width: 400px; height: 400px; background: #6366F1; top: -100px; right: -100px; }
+        .blob-2 { width: 300px; height: 300px; background: #EC4899; bottom: -50px; left: -50px; }
+        .blob-3 { width: 250px; height: 250px; background: #06B6D4; top: 50%; left: 30%; }
+    </style>
+</head>
+<body>
+    <!-- Background decorative blobs -->
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
+
+<!-- HEADER -->
+<header class="header" data-testid="app-header">
+    <h1 data-testid="app-title">Simple Books</h1>
+    <span class="status-dot" data-testid="status-indicator" title="Server Online" aria-label="Server Online"></span>
+    <nav class="nav-tabs" data-testid="nav-tabs" role="tablist">
+        <button class="nav-tab active" data-testid="nav-tab-books" role="tab" aria-selected="true" onclick="showTab('books')">Books</button>
+        <button class="nav-tab" data-testid="nav-tab-orders" role="tab" onclick="showTab('orders')">Orders</button>
+        <button class="nav-tab" data-testid="nav-tab-auth" role="tab" onclick="showTab('auth')">Auth</button>
+        <button class="nav-tab" data-testid="nav-tab-swagger" role="tab" onclick="showTab('swagger')">API Docs</button>
+    </nav>
+</header>
+
+<div class="main">
+<div class="content">
+
+<!-- ===== BOOKS TAB ===== -->
+<div class="tab-content active" id="tab-books" data-testid="section-books" role="tabpanel">
+    <h2 class="section-title">Book Catalog</h2>
+    <p class="section-desc">Browse books. Click to view detail. 5 books per page.</p>
+    <div class="filter-bar" data-testid="books-filter-bar" role="group" aria-label="Book type filter">
+        <button class="chip active" data-testid="books-filter-all" onclick="filterBooks('')">All</button>
+        <button class="chip" data-testid="books-filter-fiction" onclick="filterBooks('fiction')">Fiction</button>
+        <button class="chip" data-testid="books-filter-nonfiction" onclick="filterBooks('non-fiction')">Non-Fiction</button>
+    </div>
+    <div class="books-grid" id="books-grid" data-testid="books-grid" role="list"></div>
+    <div class="pagination" id="books-pagination" data-testid="books-pagination" role="navigation" aria-label="Pagination">
+        <button class="btn btn-secondary btn-sm" data-testid="books-btn-prev" aria-label="Previous page" onclick="changePage(-1)">&#8592; Prev</button>
+        <span class="info" id="page-info" data-testid="books-page-info" aria-live="polite">1 / 1</span>
+        <button class="btn btn-secondary btn-sm" data-testid="books-btn-next" aria-label="Next page" onclick="changePage(1)">Next &#8594;</button>
+    </div>
+</div>
+
+<!-- ===== ORDERS TAB ===== -->
+<div class="tab-content" id="tab-orders" data-testid="section-orders" role="tabpanel">
+    <h2 class="section-title">Orders</h2>
+    <p class="section-desc">Create, view, edit, and delete orders. Requires authentication.</p>
+    <div id="orders-alert" class="alert" data-testid="orders-alert" role="alert"></div>
+    <div class="glass card-box">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:14px;color:var(--text-primary)">Create New Order</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end">
+            <div class="form-group" style="margin:0">
+                <label class="form-label" for="order-bookid">Book ID</label>
+                <input class="form-input" id="order-bookid" data-testid="orders-input-bookid" type="number" placeholder="e.g. 1" aria-label="Book ID">
+            </div>
+            <div class="form-group" style="margin:0">
+                <label class="form-label" for="order-customer">Customer Name</label>
+                <input class="form-input" id="order-customer" data-testid="orders-input-customer" type="text" placeholder="John Doe" aria-label="Customer Name">
+            </div>
+            <button class="btn btn-primary" data-testid="orders-btn-create" onclick="createOrder()">Create</button>
+        </div>
+    </div>
+    <div class="glass" style="border-radius:12px;overflow:hidden;">
+        <table data-testid="orders-table" role="table">
+            <thead><tr><th>Order ID</th><th>Book ID</th><th>Customer</th><th>Created</th><th>Actions</th></tr></thead>
+            <tbody id="orders-tbody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===== AUTH TAB ===== -->
+<div class="tab-content" id="tab-auth" data-testid="section-auth" role="tabpanel">
+    <h2 class="section-title">Authentication</h2>
+    <p class="section-desc">Register or login to get an access token for protected endpoints.</p>
+    <div id="auth-alert" class="alert" data-testid="auth-alert" role="alert"></div>
+    <div class="grid-2" style="max-width:720px">
+        <!-- Register -->
+        <div class="glass card-box">
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:14px">Register New Client</h3>
+            <div class="form-group">
+                <label class="form-label" for="reg-name">Client Name</label>
+                <input class="form-input" id="reg-name" data-testid="register-input-name" placeholder="Your name" aria-label="Client Name">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="reg-email">Email</label>
+                <input class="form-input" id="reg-email" data-testid="register-input-email" type="email" placeholder="you@example.com" aria-label="Email">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="reg-password">Password</label>
+                <input class="form-input" id="reg-password" data-testid="register-input-password" type="password" placeholder="Create password" aria-label="Password">
+            </div>
+            <button class="btn btn-primary" data-testid="register-btn-submit" onclick="registerClient()" style="width:100%">Register</button>
+        </div>
+        <!-- Login -->
+        <div class="glass card-box">
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:14px">Login</h3>
+            <div class="form-group">
+                <label class="form-label" for="login-email">Email</label>
+                <input class="form-input" id="login-email" data-testid="login-input-email" type="email" placeholder="you@example.com" aria-label="Login Email">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="login-password">Password</label>
+                <input class="form-input" id="login-password" data-testid="login-input-password" type="password" placeholder="Your password" aria-label="Login Password">
+            </div>
+            <button class="btn btn-primary" data-testid="login-btn-submit" onclick="loginClient()" style="width:100%">Login</button>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+                <label class="form-label" for="login-token">Or Login with Token</label>
+                <input class="form-input" id="login-token" data-testid="login-input-token" placeholder="Paste token" aria-label="Access Token" style="font-family:monospace;font-size:12px">
+                <button class="btn btn-secondary" data-testid="login-btn-token" onclick="loginWithToken()" style="margin-top:8px;width:100%">Use Token</button>
+            </div>
+        </div>
+    </div>
+    <!-- Token display -->
+    <div style="margin-top:20px;max-width:720px">
+        <label class="form-label">Your Access Token</label>
+        <div class="token-box" id="token-display" data-testid="auth-token-display" aria-live="polite">—</div>
+    </div>
+    <!-- Reset Server -->
+    <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border);max-width:720px">
+        <h3 style="font-size:14px;font-weight:600;color:var(--error);margin-bottom:6px">Server Reset</h3>
+        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Reset all data: books stock, orders, and registered clients.</p>
+        <button class="btn btn-danger" data-testid="server-reset-btn" onclick="resetServer()">Reset Server</button>
+    </div>
+</div>
+
+<!-- ===== SWAGGER TAB ===== -->
+<div class="tab-content" id="tab-swagger" data-testid="section-swagger" role="tabpanel">
+    <h2 class="section-title">API Documentation</h2>
+    <p class="section-desc">Interactive API docs. Powered by Swagger UI.</p>
+    <div id="swagger-ui" class="glass" style="padding:16px;border-radius:12px;"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        SwaggerUIBundle({ url: '/openapi.json', dom_id: '#swagger-ui', presets: [SwaggerUIBundle.presets.apis], layout: 'BaseLayout' });
+    });
+    </script>
+</div>
+
+</div><!-- end .content -->
+
+<!-- RESPONSE PANEL -->
+<div class="resp-panel" data-testid="response-panel">
+    <div class="resp-header">
+        <span style="font-size:13px;font-weight:600;color:var(--text-primary)">Response</span>
+        <span class="resp-status s2xx" id="resp-status" data-testid="response-status">—</span>
+    </div>
+    <div class="resp-body"><pre id="resp-body" data-testid="response-body">No request made yet.</pre></div>
+</div>
+</div><!-- end .main -->
+
+<script>
+// === STATE ===
+let accessToken = '';
+let currentPage = 1;
+let currentFilter = '';
+let totalPages = 1;
+
+// === UTILS ===
+function showTab(name) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(el => { el.classList.remove('active'); el.setAttribute('aria-selected', 'false'); });
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+    event.target.setAttribute('aria-selected', 'true');
+    if (name === 'books') loadBooks();
+    if (name === 'orders') loadOrders();
+}
+
+function showResponse(status, body) {
+    const el = document.getElementById('resp-status');
+    el.textContent = status;
+    el.className = 'resp-status ' + (status >= 200 && status < 300 ? 's2xx' : 's4xx');
+    document.getElementById('resp-body').textContent = JSON.stringify(body, null, 2);
+}
+
+function showAlert(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = 'alert alert-' + type;
+    el.style.display = 'block';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+async function api(method, path, body) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (accessToken) opts.headers['Authorization'] = 'Bearer ' + accessToken;
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(path, opts);
+    const data = r.status === 204 ? null : await r.json();
+    showResponse(r.status, data);
+    return { status: r.status, data };
+}
+
+// === AUTH ===
+async function registerClient() {
+    const name = document.getElementById('reg-name').value;
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    const { status, data } = await api('POST', '/api-clients', { clientName: name, clientEmail: email, clientPassword: password });
+    if (status === 201) {
+        accessToken = data.accessToken;
+        document.getElementById('token-display').textContent = accessToken;
+        showAlert('auth-alert', 'Registered successfully!', 'success');
+    } else { showAlert('auth-alert', data.error || 'Registration failed', 'error'); }
+}
+async function loginClient() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const { status, data } = await api('POST', '/api-clients/login', { clientEmail: email, clientPassword: password });
+    if (status === 200) {
+        accessToken = data.accessToken;
+        document.getElementById('token-display').textContent = accessToken;
+        showAlert('auth-alert', 'Logged in successfully!', 'success');
+    } else { showAlert('auth-alert', data.error || 'Login failed', 'error'); }
+}
+function loginWithToken() {
+    const token = document.getElementById('login-token').value.trim();
+    if (token) { accessToken = token; document.getElementById('token-display').textContent = accessToken; showAlert('auth-alert', 'Token set!', 'success'); }
+}
+async function resetServer() {
+    if (!confirm('Reset all server data? This clears stock, orders, and registered clients.')) return;
+    const { status } = await api('POST', '/server/reset');
+    if (status === 200) { accessToken = ''; document.getElementById('token-display').textContent = '—'; showAlert('auth-alert', 'Server reset complete.', 'success'); }
+}
+
+// === BOOKS ===
+async function loadBooks() {
+    let url = '/books?page=' + currentPage + '&pageSize=5';
+    if (currentFilter) url += '&type=' + currentFilter;
+    const { status, data } = await api('GET', url);
+    if (status === 200) {
+        totalPages = data.pagination.totalPages;
+        document.getElementById('page-info').textContent = data.pagination.currentPage + ' / ' + totalPages;
+        renderBooks(data.books);
+    }
+}
+function renderBooks(books) {
+    const grid = document.getElementById('books-grid');
+    grid.innerHTML = books.map(b => `
+        <div class="glass-card book-card" data-testid="book-card-${b.id}" role="listitem" onclick="viewBook(${b.id})" tabindex="0" aria-label="${b.name}">
+            <div class="book-title">${b.name}</div>
+            <div class="book-meta">
+                <span class="badge badge-${b.type === 'fiction' ? 'fiction' : 'nonfiction'}">${b.type}</span>
+                <span class="badge badge-${b.available ? 'instock' : 'outofstock'}">${b.available ? 'In Stock' : 'Out of Stock'}</span>
+            </div>
+        </div>
+    `).join('');
+}
+async function viewBook(id) {
+    const { status, data } = await api('GET', '/books/' + id);
+    document.querySelectorAll('.book-card').forEach(c => c.classList.remove('selected'));
+    const card = document.querySelector(`[data-testid="book-card-${id}"]`);
+    if (card) card.classList.add('selected');
+}
+function filterBooks(type) {
+    currentFilter = type; currentPage = 1;
+    document.querySelectorAll('.filter-bar .chip').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    loadBooks();
+}
+function changePage(dir) {
+    const next = currentPage + dir;
+    if (next < 1 || next > totalPages) return;
+    currentPage = next; loadBooks();
+}
+
+// === ORDERS ===
+async function loadOrders() {
+    if (!accessToken) { document.getElementById('orders-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Please login first (Auth tab)</td></tr>'; return; }
+    const { status, data } = await api('GET', '/orders');
+    if (status === 200) renderOrders(data);
+}
+function renderOrders(orders) {
+    const tbody = document.getElementById('orders-tbody');
+    if (orders.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">No orders yet</td></tr>'; return; }
+    tbody.innerHTML = orders.map(o => `
+        <tr data-testid="order-row-${o.id}">
+            <td style="font-family:monospace;font-size:11px;color:var(--text-secondary)">${o.id}</td>
+            <td>${o.bookId}</td>
+            <td>${o.customerName}</td>
+            <td style="color:var(--text-secondary)">${o.timestamp ? o.timestamp.split('T')[0] : '—'}</td>
+            <td>
+                <button class="btn btn-secondary btn-sm" data-testid="order-edit-${o.id}" aria-label="Edit order ${o.id}" onclick="editOrder('${o.id}')">Edit</button>
+                <button class="btn btn-danger btn-sm" data-testid="order-delete-${o.id}" aria-label="Delete order ${o.id}" onclick="deleteOrder('${o.id}')">Delete</button>
+            </td>
+        </tr>
+    `).join('');
+}
+async function createOrder() {
+    const bookId = parseInt(document.getElementById('order-bookid').value);
+    const customerName = document.getElementById('order-customer').value;
+    if (!bookId || !customerName) { showAlert('orders-alert', 'Please fill all fields', 'error'); return; }
+    const { status, data } = await api('POST', '/orders', { bookId, customerName });
+    if (status === 201) { showAlert('orders-alert', 'Order created: ' + data.orderId, 'success'); loadOrders(); }
+    else { showAlert('orders-alert', data.error || 'Failed', 'error'); }
+}
+async function editOrder(id) {
+    const name = prompt('Enter new customer name:');
+    if (!name) return;
+    const { status } = await api('PATCH', '/orders/' + id, { customerName: name });
+    if (status === 204) { showAlert('orders-alert', 'Order updated', 'success'); loadOrders(); }
+}
+async function deleteOrder(id) {
+    if (!confirm('Delete this order?')) return;
+    const { status } = await api('DELETE', '/orders/' + id);
+    if (status === 204) { showAlert('orders-alert', 'Order deleted', 'success'); loadOrders(); }
+}
+
+// Init
+window.addEventListener('DOMContentLoaded', () => { loadBooks(); });
+</script>
+</body>
+</html>

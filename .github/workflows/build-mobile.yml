@@ -1,0 +1,61 @@
+name: Build Mobile App
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: stable
+
+      - name: Install dependencies
+        working-directory: frontend/books-mobile-app
+        run: flutter pub get
+
+      - name: Build APK
+        working-directory: frontend/books-mobile-app
+        run: flutter build apk --debug
+
+      - name: Upload APK to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: frontend/books-mobile-app/build/app/outputs/flutter-apk/app-debug.apk
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: stable
+
+      - name: Install dependencies
+        working-directory: frontend/books-mobile-app
+        run: flutter pub get
+
+      - name: Build iOS (no codesign)
+        working-directory: frontend/books-mobile-app
+        run: flutter build ios --no-codesign
+
+      - name: Create IPA
+        working-directory: frontend/books-mobile-app
+        run: |
+          mkdir -p build/ios/ipa
+          cd build/ios/iphoneos
+          mkdir Payload
+          cp -r Runner.app Payload/
+          zip -r ../ipa/SimpleBooks.ipa Payload
+
+      - name: Upload IPA to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: frontend/books-mobile-app/build/ios/ipa/SimpleBooks.ipa
