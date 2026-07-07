@@ -10,11 +10,11 @@ jobs:
   android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.27.4'
           channel: stable
 
       - name: Create platform files
@@ -30,7 +30,7 @@ jobs:
         run: flutter build apk --debug
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: app-debug.apk
           path: frontend/books-mobile-app/build/app/outputs/flutter-apk/app-debug.apk
@@ -44,11 +44,11 @@ jobs:
   ios:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.27.4'
           channel: stable
 
       - name: Create platform files
@@ -59,21 +59,21 @@ jobs:
         working-directory: frontend/books-mobile-app
         run: flutter pub get
 
-      - name: Build iOS (no codesign)
+      - name: Build iOS (simulator)
         working-directory: frontend/books-mobile-app
-        run: flutter build ios --no-codesign
+        run: flutter build ios --simulator
 
       - name: Create IPA
         working-directory: frontend/books-mobile-app
         run: |
           mkdir -p build/ios/ipa
-          cd build/ios/iphoneos
+          cd build/ios/iphonesimulator
           mkdir Payload
           cp -r Runner.app Payload/
           zip -r ../ipa/SimpleBooks.ipa Payload
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: SimpleBooks.ipa
           path: frontend/books-mobile-app/build/ios/ipa/SimpleBooks.ipa
