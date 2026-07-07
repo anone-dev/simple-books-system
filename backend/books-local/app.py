@@ -34,10 +34,31 @@ def create_app():
     def serve_index():
         return app.send_static_file("index.html")
 
+    # Serve API docs page
+    @app.route("/docs")
+    def serve_docs():
+        return app.send_static_file("docs.html")
+
     return app
 
 
 if __name__ == "__main__":
     app = create_app()
     port = int(os.environ.get("PORT", 5000))
+
+    print()
+    print("=" * 52)
+    print("  Simple Books API Server")
+    print("=" * 52)
+    print(f"  Version   : v0.3.0")
+    print(f"  Developer : AXONS CoE-QA")
+    print(f"  Platform  : Flask + Python (PyInstaller)")
+    print(f"  Port      : {port}")
+    print("-" * 52)
+    print(f"  Web UI    : http://localhost:{port}")
+    print(f"  API Docs  : http://localhost:{port}/docs")
+    print(f"  Health    : http://localhost:{port}/status")
+    print("=" * 52)
+    print()
+
     app.run(host="0.0.0.0", port=port, debug=True)

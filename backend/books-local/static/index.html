@@ -85,24 +85,8 @@
         .nav-tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
         .nav-tab.active { color: #fff; background: var(--accent); box-shadow: 0 4px 12px var(--accent-glow); }
 
-        .main { display: flex; height: calc(100vh - 56px); }
-        .content { flex: 1; padding: 24px; overflow-y: auto; }
-        .resp-panel {
-            width: 380px; border-left: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(12px);
-            display: flex; flex-direction: column;
-        }
-        .resp-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-        .resp-status { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
-        .resp-status.s2xx { background: var(--success-bg); color: var(--success); }
-        .resp-status.s4xx { background: var(--error-bg); color: var(--error); }
-        .resp-body { flex: 1; padding: 16px; overflow: auto; }
-        .resp-body pre {
-            font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 12px;
-            background: rgba(0, 0, 0, 0.3); color: #A5B4FC;
-            padding: 16px; border-radius: 10px; white-space: pre-wrap; word-break: break-all;
-            border: 1px solid var(--border);
-        }
+        .main { height: calc(100vh - 56px); }
+        .content { padding: 24px; overflow-y: auto; height: 100%; }
 
         /* Section */
         .section-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; }
@@ -148,11 +132,18 @@
         .chip:hover { color: var(--text-primary); border-color: var(--glass-border); }
         .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px var(--accent-glow); }
 
-        .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+        .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
         .book-card {
-            padding: 16px; cursor: pointer;
+            padding: 16px; cursor: pointer; display: flex; gap: 14px; align-items: flex-start;
         }
         .book-card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow), 0 8px 24px rgba(0,0,0,0.2); }
+        .book-cover-icon {
+            min-width: 52px; width: 52px; height: 68px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .book-cover-icon.fiction { background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(165,180,252,0.15)); border: 1px solid rgba(99,102,241,0.3); }
+        .book-cover-icon.nonfiction { background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(251,191,36,0.15)); border: 1px solid rgba(245,158,11,0.3); }
+        .book-card-content { flex: 1; min-width: 0; }
         .book-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
         .book-author { font-size: 12px; color: var(--text-secondary); }
         .book-meta { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
@@ -191,6 +182,36 @@
         .blob-1 { width: 400px; height: 400px; background: #6366F1; top: -100px; right: -100px; }
         .blob-2 { width: 300px; height: 300px; background: #EC4899; bottom: -50px; left: -50px; }
         .blob-3 { width: 250px; height: 250px; background: #06B6D4; top: 50%; left: 30%; }
+
+        /* Book detail modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: rgba(30, 27, 75, 0.95); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 32px; width: 420px; max-width: 90vw; max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+        }
+        .modal-close {
+            float: right; background: none; border: none; color: var(--text-secondary);
+            font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .modal-close:hover { color: var(--text-primary); background: rgba(255,255,255,0.1); }
+        .book-detail-icon {
+            width: 80px; height: 100px; border-radius: 10px; margin: 0 auto 20px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .book-detail-icon.fiction { background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(165,180,252,0.15)); border: 1px solid rgba(99,102,241,0.4); }
+        .book-detail-icon.nonfiction { background: linear-gradient(135deg, rgba(245,158,11,0.3), rgba(251,191,36,0.15)); border: 1px solid rgba(245,158,11,0.4); }
+        .detail-title { font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 4px; }
+        .detail-author { font-size: 13px; color: var(--text-secondary); text-align: center; margin-bottom: 20px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .detail-row-label { color: var(--text-secondary); }
+        .detail-row-value { font-weight: 500; }
     </style>
 </head>
 <body>
@@ -207,7 +228,7 @@
         <button class="nav-tab active" data-testid="nav-tab-books" role="tab" aria-selected="true" onclick="showTab('books')">Books</button>
         <button class="nav-tab" data-testid="nav-tab-orders" role="tab" onclick="showTab('orders')">Orders</button>
         <button class="nav-tab" data-testid="nav-tab-auth" role="tab" onclick="showTab('auth')">Auth</button>
-        <button class="nav-tab" data-testid="nav-tab-swagger" role="tab" onclick="showTab('swagger')">API Docs</button>
+        <button class="nav-tab" data-testid="nav-tab-swagger" role="tab" onclick="window.open('/docs','_blank')">API Docs ↗</button>
     </nav>
 </header>
 
@@ -300,10 +321,25 @@
             </div>
         </div>
     </div>
-    <!-- Token display -->
+    <!-- Client Info Display -->
     <div style="margin-top:20px;max-width:720px">
-        <label class="form-label">Your Access Token</label>
-        <div class="token-box" id="token-display" data-testid="auth-token-display" aria-live="polite">—</div>
+        <div id="client-info-card" data-testid="auth-client-info" class="glass card-box" style="display:none;">
+            <h3 style="font-size:14px;font-weight:600;margin-bottom:14px;color:var(--text-primary)">Registered Client</h3>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:13px;align-items:center;">
+                <span class="form-label" style="margin:0;">Name</span>
+                <span id="client-info-name" data-testid="auth-client-name" style="font-weight:500;">—</span>
+                <span class="form-label" style="margin:0;">Email</span>
+                <span id="client-info-email" data-testid="auth-client-email" style="font-weight:500;">—</span>
+                <span class="form-label" style="margin:0;">Token</span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <div class="token-box" id="client-info-token" data-testid="auth-token-display" aria-live="polite" style="flex:1;margin:0;">—</div>
+                    <button class="btn btn-secondary btn-sm" data-testid="auth-btn-copy-token" onclick="copyToken()" title="Copy token" aria-label="Copy token">📋 Copy</button>
+                </div>
+            </div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+                <button class="btn btn-danger" data-testid="auth-btn-logout" onclick="logoutClient()" style="width:100%;">Logout</button>
+            </div>
+        </div>
     </div>
     <!-- Reset Server -->
     <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border);max-width:720px">
@@ -313,31 +349,17 @@
     </div>
 </div>
 
-<!-- ===== SWAGGER TAB ===== -->
-<div class="tab-content" id="tab-swagger" data-testid="section-swagger" role="tabpanel">
-    <h2 class="section-title">API Documentation</h2>
-    <p class="section-desc">Interactive API docs. Powered by Swagger UI.</p>
-    <div id="swagger-ui" class="glass" style="padding:16px;border-radius:12px;"></div>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
-    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        SwaggerUIBundle({ url: '/openapi.json', dom_id: '#swagger-ui', presets: [SwaggerUIBundle.presets.apis], layout: 'BaseLayout' });
-    });
-    </script>
-</div>
 
 </div><!-- end .content -->
-
-<!-- RESPONSE PANEL -->
-<div class="resp-panel" data-testid="response-panel">
-    <div class="resp-header">
-        <span style="font-size:13px;font-weight:600;color:var(--text-primary)">Response</span>
-        <span class="resp-status s2xx" id="resp-status" data-testid="response-status">—</span>
-    </div>
-    <div class="resp-body"><pre id="resp-body" data-testid="response-body">No request made yet.</pre></div>
-</div>
 </div><!-- end .main -->
+
+<!-- Book Detail Modal -->
+<div class="modal-overlay" id="book-detail-modal" data-testid="book-detail-modal" onclick="closeBookDetail(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <button class="modal-close" data-testid="book-detail-close" onclick="closeBookDetail()" aria-label="Close">&times;</button>
+        <div id="book-detail-content" data-testid="book-detail-content"></div>
+    </div>
+</div>
 
 <script>
 // === STATE ===
@@ -358,10 +380,8 @@ function showTab(name) {
 }
 
 function showResponse(status, body) {
-    const el = document.getElementById('resp-status');
-    el.textContent = status;
-    el.className = 'resp-status ' + (status >= 200 && status < 300 ? 's2xx' : 's4xx');
-    document.getElementById('resp-body').textContent = JSON.stringify(body, null, 2);
+    // Response logged to console (panel removed)
+    console.log('API Response:', status, body);
 }
 
 function showAlert(id, msg, type) {
@@ -383,6 +403,35 @@ async function api(method, path, body) {
 }
 
 // === AUTH ===
+function showClientInfo(name, email, token) {
+    document.getElementById('client-info-name').textContent = name || '—';
+    document.getElementById('client-info-email').textContent = email || '—';
+    document.getElementById('client-info-token').textContent = token || '—';
+    document.getElementById('client-info-card').style.display = 'block';
+}
+
+function copyToken() {
+    if (!accessToken) return;
+    navigator.clipboard.writeText(accessToken).then(() => {
+        showAlert('auth-alert', 'Token copied to clipboard!', 'success');
+    }).catch(() => {
+        // Fallback for older browsers
+        const el = document.createElement('textarea');
+        el.value = accessToken;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showAlert('auth-alert', 'Token copied to clipboard!', 'success');
+    });
+}
+
+function logoutClient() {
+    accessToken = '';
+    document.getElementById('client-info-card').style.display = 'none';
+    showAlert('auth-alert', 'Logged out successfully.', 'success');
+}
+
 async function registerClient() {
     const name = document.getElementById('reg-name').value;
     const email = document.getElementById('reg-email').value;
@@ -390,7 +439,7 @@ async function registerClient() {
     const { status, data } = await api('POST', '/api-clients', { clientName: name, clientEmail: email, clientPassword: password });
     if (status === 201) {
         accessToken = data.accessToken;
-        document.getElementById('token-display').textContent = accessToken;
+        showClientInfo(name, email, accessToken);
         showAlert('auth-alert', 'Registered successfully!', 'success');
     } else { showAlert('auth-alert', data.error || 'Registration failed', 'error'); }
 }
@@ -400,18 +449,18 @@ async function loginClient() {
     const { status, data } = await api('POST', '/api-clients/login', { clientEmail: email, clientPassword: password });
     if (status === 200) {
         accessToken = data.accessToken;
-        document.getElementById('token-display').textContent = accessToken;
+        showClientInfo('—', email, accessToken);
         showAlert('auth-alert', 'Logged in successfully!', 'success');
     } else { showAlert('auth-alert', data.error || 'Login failed', 'error'); }
 }
 function loginWithToken() {
     const token = document.getElementById('login-token').value.trim();
-    if (token) { accessToken = token; document.getElementById('token-display').textContent = accessToken; showAlert('auth-alert', 'Token set!', 'success'); }
+    if (token) { accessToken = token; showClientInfo('—', '—', accessToken); showAlert('auth-alert', 'Token set!', 'success'); }
 }
 async function resetServer() {
     if (!confirm('Reset all server data? This clears stock, orders, and registered clients.')) return;
     const { status } = await api('POST', '/server/reset');
-    if (status === 200) { accessToken = ''; document.getElementById('token-display').textContent = '—'; showAlert('auth-alert', 'Server reset complete.', 'success'); }
+    if (status === 200) { accessToken = ''; document.getElementById('client-info-card').style.display = 'none'; showAlert('auth-alert', 'Server reset complete.', 'success'); }
 }
 
 // === BOOKS ===
@@ -427,21 +476,85 @@ async function loadBooks() {
 }
 function renderBooks(books) {
     const grid = document.getElementById('books-grid');
-    grid.innerHTML = books.map(b => `
+    grid.innerHTML = books.map(b => {
+        const isFiction = b.type === 'fiction';
+        const iconColor = isFiction ? '#A5B4FC' : '#FBBF24';
+        const coverClass = isFiction ? 'fiction' : 'nonfiction';
+        return `
         <div class="glass-card book-card" data-testid="book-card-${b.id}" role="listitem" onclick="viewBook(${b.id})" tabindex="0" aria-label="${b.name}">
-            <div class="book-title">${b.name}</div>
-            <div class="book-meta">
-                <span class="badge badge-${b.type === 'fiction' ? 'fiction' : 'nonfiction'}">${b.type}</span>
-                <span class="badge badge-${b.available ? 'instock' : 'outofstock'}">${b.available ? 'In Stock' : 'Out of Stock'}</span>
+            <div class="book-cover-icon ${coverClass}">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h5"/></svg>
             </div>
-        </div>
-    `).join('');
+            <div class="book-card-content">
+                <div class="book-title">${b.name}</div>
+                <div class="book-meta">
+                    <span class="badge badge-${isFiction ? 'fiction' : 'nonfiction'}">${b.type}</span>
+                    <span class="badge badge-${b.available ? 'instock' : 'outofstock'}">${b.available ? 'In Stock' : 'Out of Stock'}</span>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
 }
 async function viewBook(id) {
     const { status, data } = await api('GET', '/books/' + id);
     document.querySelectorAll('.book-card').forEach(c => c.classList.remove('selected'));
     const card = document.querySelector(`[data-testid="book-card-${id}"]`);
     if (card) card.classList.add('selected');
+
+    if (status === 200 && data) {
+        const isFiction = data.type === 'fiction';
+        const iconColor = isFiction ? '#A5B4FC' : '#FBBF24';
+        const coverClass = isFiction ? 'fiction' : 'nonfiction';
+        const stockText = data.available ? `In Stock (${data['current-stock'] ?? '—'})` : 'Out of Stock';
+        const stockColor = data.available ? 'var(--success)' : 'var(--error)';
+
+        document.getElementById('book-detail-content').innerHTML = `
+            <div class="book-detail-icon ${coverClass}">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h5"/></svg>
+            </div>
+            <div class="detail-title" data-testid="book-detail-title">${data.name}</div>
+            <div class="detail-author" data-testid="book-detail-author">${data.author || ''}</div>
+            <div class="detail-row"><span class="detail-row-label">Type</span><span class="detail-row-value" data-testid="book-detail-type">${data.type}</span></div>
+            <div class="detail-row"><span class="detail-row-label">Price</span><span class="detail-row-value" data-testid="book-detail-price" style="color:var(--accent-hover);">$${data.price?.toFixed(2) ?? '—'}</span></div>
+            <div class="detail-row"><span class="detail-row-label">Stock</span><span class="detail-row-value" data-testid="book-detail-stock" style="color:${stockColor};">${stockText}</span></div>
+            <div class="detail-row" style="border-bottom:none;"><span class="detail-row-label">Book ID</span><span class="detail-row-value" data-testid="book-detail-id">${data.id}</span></div>
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+                <p style="font-size:13px;font-weight:600;margin-bottom:10px;">Place Order</p>
+                <div style="display:flex;gap:10px;">
+                    <input class="form-input" id="detail-order-customer" data-testid="book-detail-input-customer" placeholder="Customer name" aria-label="Customer Name" style="flex:1;">
+                    <button class="btn btn-primary" data-testid="book-detail-btn-order" onclick="orderFromDetail(${data.id})" ${!data.available && data.id !== 3 ? 'disabled' : ''}>${data.available ? 'Order' : 'Out of Stock'}</button>
+                </div>
+                <div id="detail-order-alert" class="alert" style="margin-top:10px;" role="alert"></div>
+            </div>
+        `;
+        document.getElementById('book-detail-modal').classList.add('open');
+    }
+}
+
+function closeBookDetail(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('book-detail-modal').classList.remove('open');
+}
+
+async function orderFromDetail(bookId) {
+    const name = document.getElementById('detail-order-customer').value.trim();
+    if (!name) {
+        const el = document.getElementById('detail-order-alert');
+        el.textContent = 'Please enter customer name';
+        el.className = 'alert alert-error'; el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 3000);
+        return;
+    }
+    const { status, data } = await api('POST', '/orders', { bookId, customerName: name });
+    const el = document.getElementById('detail-order-alert');
+    if (status === 201) {
+        el.textContent = 'Order created: ' + data.orderId;
+        el.className = 'alert alert-success'; el.style.display = 'block';
+    } else {
+        el.textContent = data.error || 'Order failed';
+        el.className = 'alert alert-error'; el.style.display = 'block';
+    }
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 function filterBooks(type) {
     currentFilter = type; currentPage = 1;

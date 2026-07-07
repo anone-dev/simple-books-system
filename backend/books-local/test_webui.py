@@ -27,8 +27,7 @@ checks = [
     ("Has pagination section", "books-pagination" in html),
     ("Has auth section", "section-auth" in html),
     ("Has orders section", "section-orders" in html),
-    ("Has swagger-ui div", "swagger-ui" in html),
-    ("Has openapi.json reference", "openapi.json" in html),
+    ("Has API Docs link to /docs", "/docs" in html),
     ("Has filter chips", "books-filter-fiction" in html),
     ("Has register form", "register-input-name" in html),
     ("Has login form", "login-input-email" in html),
@@ -47,6 +46,13 @@ r2 = c.get("/openapi.json")
 oas_ok = r2.status_code == 200
 print(f"  {'PASS' if oas_ok else 'FAIL'}: OpenAPI spec serves at /openapi.json (status {r2.status_code})")
 if not oas_ok:
+    all_pass = False
+
+# Check /docs page serves
+r3 = c.get("/docs")
+docs_ok = r3.status_code == 200 and "swagger-ui" in r3.get_data(as_text=True)
+print(f"  {'PASS' if docs_ok else 'FAIL'}: API docs page serves at /docs (status {r3.status_code})")
+if not docs_ok:
     all_pass = False
 
 print(f"\n=== {'ALL CHECKS PASSED' if all_pass else 'SOME CHECKS FAILED'} ===")

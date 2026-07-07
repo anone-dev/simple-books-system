@@ -6,12 +6,16 @@ import '../services/api_service.dart';
 class AuthProvider extends ChangeNotifier {
   final ApiService _api;
   String? _token;
+  String? _clientName;
+  String? _clientEmail;
   bool _isLoading = false;
   String? _error;
 
   AuthProvider(this._api);
 
   String? get token => _token;
+  String? get clientName => _clientName;
+  String? get clientEmail => _clientEmail;
   bool get isAuthenticated => _token != null;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -31,6 +35,8 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _token = await _api.register(name, email, password);
+      _clientName = name;
+      _clientEmail = email;
       await _saveToken(_token!);
       _isLoading = false;
       notifyListeners();
@@ -55,6 +61,8 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _token = await _api.login(email, password);
+      _clientName = null;
+      _clientEmail = email;
       await _saveToken(_token!);
       _isLoading = false;
       notifyListeners();
@@ -83,6 +91,8 @@ class AuthProvider extends ChangeNotifier {
   /// Logout and clear token.
   Future<void> logout() async {
     _token = null;
+    _clientName = null;
+    _clientEmail = null;
     _api.token = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('access_token');

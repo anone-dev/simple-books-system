@@ -7,6 +7,7 @@ import 'providers/orders_provider.dart';
 import 'screens/auth/auth_screen.dart';
 import 'screens/books/books_screen.dart';
 import 'screens/orders/orders_screen.dart';
+import 'screens/profile/profile_screen.dart';
 
 void main() {
   runApp(const SimpleBooksApp());
@@ -132,7 +133,7 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final _screens = const [BooksScreen(), OrdersScreen()];
+  final _screens = const [BooksScreen(), OrdersScreen(), ProfileScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +155,12 @@ class _MainNavigationState extends State<MainNavigation> {
             icon: Icon(Icons.receipt_long_outlined),
             selectedIcon: Icon(Icons.receipt_long),
             label: 'Orders',
+          ),
+          NavigationDestination(
+            key: Key('nav_info'),
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
+            label: 'Info',
           ),
         ],
       ),
