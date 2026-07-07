@@ -4,7 +4,7 @@
 import os
 
 block_cipher = None
-base_dir = os.path.dirname(os.path.abspath(SPECPATH))
+base_dir = os.getcwd()
 
 a = Analysis(
     [os.path.join(base_dir, "app.py")],
