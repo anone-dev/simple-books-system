@@ -45,7 +45,14 @@ jobs:
             mv SimpleBooks "${{ matrix.artifact }}"
           fi
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: backend/books-local/dist/${{ matrix.artifact }}
+
       - name: Upload to Release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: backend/books-local/dist/${{ matrix.artifact }}
