@@ -42,7 +42,11 @@ def register_client():
         "accessToken": access_token,
     }
 
-    return jsonify({"accessToken": access_token}), 201
+    return jsonify({
+        "accessToken": access_token,
+        "clientName": client_name,
+        "clientEmail": client_email,
+    }), 201
 
 
 @clients_bp.route("/api-clients/login", methods=["POST"])
@@ -68,5 +72,35 @@ def login_client():
     if client is None or client["clientPassword"] != client_password:
         return jsonify({"error": "Invalid email or password."}), 401
 
-    return jsonify({"accessToken": client["accessToken"]}), 200
+    return jsonify({
+        "accessToken": client["accessToken"],
+        "clientName": client["clientName"],
+        "clientEmail": client["clientEmail"],
+    }), 200
+
+
+@clients_bp.route("/api-clients/me", methods=["GET"])
+def get_current_client():
+    """Get current client profile using Bearer token."""
+    from middleware.auth import require_auth
+    # Inline auth check (since we can't use decorator and return profile)
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing or invalid access token."}), 401
+
+    token = auth_header[7:]
+    client_found = None
+    for email, client in data.clients.items():
+        if client["accessToken"] == token:
+            client_found = client
+            break
+
+    if client_found is None:
+        return jsonify({"error": "Missing or invalid access token."}), 401
+
+    return jsonify({
+        "clientName": client_found["clientName"],
+        "clientEmail": client_found["clientEmail"],
+        "accessToken": client_found["accessToken"],
+    }), 200
 

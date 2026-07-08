@@ -24,7 +24,20 @@ class AuthProvider extends ChangeNotifier {
   Future<void> loadSavedToken() async {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('access_token');
-    if (_token != null) _api.token = _token;
+    _clientName = prefs.getString('client_name');
+    _clientEmail = prefs.getString('client_email');
+    if (_token != null) {
+      _api.token = _token;
+      // Refresh profile from API (in case name changed elsewhere)
+      try {
+        final profile = await _api.getMe();
+        _clientName = profile['clientName'];
+        _clientEmail = profile['clientEmail'];
+        await _saveToken(_token!);
+      } catch (_) {
+        // Server might be down or token invalid — use cached values
+      }
+    }
     notifyListeners();
   }
 
@@ -34,9 +47,10 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      _token = await _api.register(name, email, password);
-      _clientName = name;
-      _clientEmail = email;
+      final result = await _api.register(name, email, password);
+      _token = result['accessToken'];
+      _clientName = result['clientName'];
+      _clientEmail = result['clientEmail'];
       await _saveToken(_token!);
       _isLoading = false;
       notifyListeners();
@@ -60,9 +74,10 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      _token = await _api.login(email, password);
-      _clientName = null;
-      _clientEmail = email;
+      final result = await _api.login(email, password);
+      _token = result['accessToken'];
+      _clientName = result['clientName'];
+      _clientEmail = result['clientEmail'];
       await _saveToken(_token!);
       _isLoading = false;
       notifyListeners();
@@ -85,6 +100,14 @@ class AuthProvider extends ChangeNotifier {
     _token = token;
     _api.token = token;
     await _saveToken(token);
+    // Fetch client profile from API
+    try {
+      final profile = await _api.getMe();
+      _clientName = profile['clientName'];
+      _clientEmail = profile['clientEmail'];
+    } catch (_) {
+      // Token might be invalid — still set it, profile shows '—'
+    }
     notifyListeners();
   }
 
@@ -96,6 +119,8 @@ class AuthProvider extends ChangeNotifier {
     _api.token = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('access_token');
+    await prefs.remove('client_name');
+    await prefs.remove('client_email');
     notifyListeners();
   }
 
@@ -116,5 +141,7 @@ class AuthProvider extends ChangeNotifier {
     _api.token = token;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('access_token', token);
+    if (_clientName != null) await prefs.setString('client_name', _clientName!);
+    if (_clientEmail != null) await prefs.setString('client_email', _clientEmail!);
   }
 }

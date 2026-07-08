@@ -115,7 +115,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 icon: const Icon(Icons.refresh, size: 16, color: Colors.red),
                 label: const Text('Reset Server', style: TextStyle(color: Colors.red, fontSize: 12)),
               ),
-              Text('v0.3.0 • AXONS CoE-QA', style: TextStyle(fontSize: 11, color: Colors.white24)),
+              Text('v3.3.0 • AXONS CoE-QA', style: TextStyle(fontSize: 11, color: Colors.white24)),
             ],
           ),
         ),

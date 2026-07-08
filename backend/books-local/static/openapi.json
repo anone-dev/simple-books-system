@@ -28,7 +28,7 @@
         "summary": "Register new client",
         "operationId": "registerClient",
         "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["clientName", "clientEmail", "clientPassword"], "properties": {"clientName": {"type": "string", "example": "QA Tester"}, "clientEmail": {"type": "string", "example": "qa@axons.com"}, "clientPassword": {"type": "string", "example": "pass123"}}}}}},
-        "responses": {"201": {"description": "Created", "content": {"application/json": {"schema": {"type": "object", "properties": {"accessToken": {"type": "string"}}}}}}, "409": {"description": "Email already registered"}, "400": {"description": "Missing fields"}}
+        "responses": {"201": {"description": "Created", "content": {"application/json": {"schema": {"type": "object", "properties": {"accessToken": {"type": "string"}, "clientName": {"type": "string"}, "clientEmail": {"type": "string"}}}}}}, "409": {"description": "Email already registered"}, "400": {"description": "Missing fields"}}
       }
     },
     "/api-clients/login": {
@@ -37,7 +37,16 @@
         "summary": "Login with email and password",
         "operationId": "loginClient",
         "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "required": ["clientEmail", "clientPassword"], "properties": {"clientEmail": {"type": "string"}, "clientPassword": {"type": "string"}}}}}},
-        "responses": {"200": {"description": "OK", "content": {"application/json": {"schema": {"type": "object", "properties": {"accessToken": {"type": "string"}}}}}}, "401": {"description": "Invalid credentials"}}
+        "responses": {"200": {"description": "OK", "content": {"application/json": {"schema": {"type": "object", "properties": {"accessToken": {"type": "string"}, "clientName": {"type": "string"}, "clientEmail": {"type": "string"}}}}}}, "401": {"description": "Invalid credentials"}}
+      }
+    },
+    "/api-clients/me": {
+      "get": {
+        "tags": ["Clients"],
+        "summary": "Get current client profile",
+        "operationId": "getMe",
+        "security": [{"BearerAuth": []}],
+        "responses": {"200": {"description": "OK", "content": {"application/json": {"schema": {"type": "object", "properties": {"clientName": {"type": "string"}, "clientEmail": {"type": "string"}, "accessToken": {"type": "string"}}}}}}, "401": {"description": "Unauthorized"}}
       }
     },
     "/books": {

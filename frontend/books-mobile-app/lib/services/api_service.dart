@@ -22,32 +22,53 @@ class ApiService {
 
   // --- Auth ---
 
-  Future<String> register(String name, String email, String password) async {
+  Future<Map<String, String>> register(String name, String email, String password) async {
     final r = await http.post(
       _uri('/api-clients'),
       headers: _headers,
       body: jsonEncode({'clientName': name, 'clientEmail': email, 'clientPassword': password}),
     );
     if (r.statusCode == 201) {
-      final token = jsonDecode(r.body)['accessToken'];
-      _token = token;
-      return token;
+      final body = jsonDecode(r.body);
+      _token = body['accessToken'];
+      return {
+        'accessToken': body['accessToken'],
+        'clientName': body['clientName'],
+        'clientEmail': body['clientEmail'],
+      };
     }
     throw ApiException(r.statusCode, jsonDecode(r.body)['error'] ?? 'Registration failed');
   }
 
-  Future<String> login(String email, String password) async {
+  Future<Map<String, String>> login(String email, String password) async {
     final r = await http.post(
       _uri('/api-clients/login'),
       headers: _headers,
       body: jsonEncode({'clientEmail': email, 'clientPassword': password}),
     );
     if (r.statusCode == 200) {
-      final token = jsonDecode(r.body)['accessToken'];
-      _token = token;
-      return token;
+      final body = jsonDecode(r.body);
+      _token = body['accessToken'];
+      return {
+        'accessToken': body['accessToken'],
+        'clientName': body['clientName'],
+        'clientEmail': body['clientEmail'],
+      };
     }
     throw ApiException(r.statusCode, jsonDecode(r.body)['error'] ?? 'Login failed');
+  }
+
+  Future<Map<String, String>> getMe() async {
+    final r = await http.get(_uri('/api-clients/me'), headers: _headers);
+    if (r.statusCode == 200) {
+      final body = jsonDecode(r.body);
+      return {
+        'clientName': body['clientName'] ?? '',
+        'clientEmail': body['clientEmail'] ?? '',
+        'accessToken': body['accessToken'] ?? '',
+      };
+    }
+    throw ApiException(r.statusCode, jsonDecode(r.body)['error'] ?? 'Failed to get profile');
   }
 
   // --- Books ---
