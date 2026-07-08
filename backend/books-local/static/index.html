@@ -467,8 +467,11 @@ async function registerClient() {
     const { status, data } = await api('POST', '/api-clients', { clientName: name, clientEmail: email, clientPassword: password });
     if (status === 201) {
         accessToken = data.accessToken;
-        showClientInfo(name, email, accessToken);
+        showClientInfo(data.clientName || name, data.clientEmail || email, accessToken);
         showAlert('auth-alert', 'Registered successfully!', 'success');
+        document.getElementById('reg-name').value = '';
+        document.getElementById('reg-email').value = '';
+        document.getElementById('reg-password').value = '';
     } else { showAlert('auth-alert', data.error || 'Registration failed', 'error'); }
 }
 async function loginClient() {
@@ -479,6 +482,8 @@ async function loginClient() {
         accessToken = data.accessToken;
         showClientInfo(data.clientName || '—', data.clientEmail || email, accessToken);
         showAlert('auth-alert', 'Logged in successfully!', 'success');
+        document.getElementById('login-email').value = '';
+        document.getElementById('login-password').value = '';
     } else { showAlert('auth-alert', data.error || 'Login failed', 'error'); }
 }
 async function loginWithToken() {
@@ -494,6 +499,7 @@ async function loginWithToken() {
         showClientInfo('—', '—', accessToken);
         showAlert('auth-alert', 'Token set (could not fetch profile)', 'success');
     }
+    document.getElementById('login-token').value = '';
 }
 async function resetServer() {
     if (!confirm('Reset all server data? This clears stock, orders, and registered clients.')) return;
