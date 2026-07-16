@@ -65,4 +65,6 @@ if __name__ == "__main__":
         print("=" * 52)
         print()
 
-    app.run(host="0.0.0.0", port=port, debug=True)
+    # Disable debug/reloader when running as PyInstaller bundle
+    is_bundled = getattr(sys, "_MEIPASS", None) is not None
+    app.run(host="0.0.0.0", port=port, debug=not is_bundled, use_reloader=not is_bundled)
