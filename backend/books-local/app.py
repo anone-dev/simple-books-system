@@ -44,7 +44,7 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5001))
 
     # Only print banner once (skip on reloader subprocess)
     if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
@@ -53,7 +53,7 @@ if __name__ == "__main__":
         print("=" * 52)
         print("  Simple Books API Server")
         print("=" * 52)
-        print(f"  Version   : v3.3.0")
+        print(f"  Version   : v3.4.0")
         print(f"  Developer : AXONS CoE-QA")
         print(f"  Date      : {date.today().isoformat()}")
         print(f"  Platform  : Flask + Python (PyInstaller)")

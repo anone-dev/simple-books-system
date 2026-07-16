@@ -109,9 +109,9 @@ class ProfileScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _InfoRow(label: 'App', value: 'Simple Books', valueKey: Key('profile_app_name')),
-                  _InfoRow(label: 'Version', value: 'v3.3.0', valueKey: Key('profile_app_version')),
+                  _InfoRow(label: 'Version', value: 'v3.4.0', valueKey: Key('profile_app_version')),
                   _InfoRow(label: 'Developer', value: 'AXONS CoE-QA', valueKey: Key('profile_developer_name')),
-                  _InfoRow(label: 'Date', value: '2026-07-07', valueKey: Key('profile_app_date')),
+                  _InfoRow(label: 'Date', value: '2026-07-16', valueKey: Key('profile_app_date')),
                   _InfoRow(label: 'Platform', value: 'Flutter + Python API', valueKey: Key('profile_platform')),
                 ],
               ),
