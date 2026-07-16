@@ -44,7 +44,7 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    port = int(os.environ.get("PORT", 5001))
+    port = int(os.environ.get("PORT", 3100))
 
     # Only print banner once (skip on reloader subprocess)
     if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
